@@ -12,7 +12,7 @@ urlpatterns = [
      path('about/', views.about),
      path('login/', views.MyTokenObtainPairView.as_view()),
      path('register/', views.register),
-     # path('tasks/', views.tasks),
+     path('logout/', views.logout),
      path('tasks/', views.tasks),  # URL for listing and creating tasks
      path('tasks/<int:id>/', views.tasks), 
   

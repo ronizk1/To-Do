@@ -1,20 +1,3 @@
-# from django.shortcuts import render
-# from django.http import HttpResponse, JsonResponse
-# from rest_framework import serializers
-# from .models import Task
-# from django.contrib.auth.models import User
-# from rest_framework.response import Response
-# from rest_framework.decorators import api_view
-# from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-# from rest_framework_simplejwt.views import TokenObtainPairView
-# from rest_framework.permissions import IsAuthenticated
-# from rest_framework.decorators import api_view, permission_classes
-# from rest_framework.decorators import api_view
-# from rest_framework.response import Response
-# from .models import Task
-# from .serializers import TaskSerializer
-# from django.shortcuts import get_object_or_404
-
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from rest_framework import serializers
@@ -27,6 +10,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .serializers import TaskSerializer
+
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,8 +48,15 @@ def register(request):
     user.save()
     return Response("new user born")
 
-
-
+# logout
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    # Invalidate the token on the client side
+    response = Response({"message": "Logged out successfully"}, status=200)
+    response.delete_cookie('access_token')  # if you are storing JWT in cookies
+    response.delete_cookie('refresh_token')  # if you are storing refresh token in cookies
+    return response
 
 #i’m protected
 @api_view(['GET'])
@@ -73,9 +64,6 @@ def register(request):
 def about(req):
     return Response("about")
 
-# @api_view(['GET'])
-# def tasks(req):
-#     return Response('hello')
 
 
 
