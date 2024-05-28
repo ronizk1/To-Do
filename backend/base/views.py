@@ -11,6 +11,10 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .serializers import TaskSerializer
 
+from rest_framework_simplejwt.views import TokenObtainPairView
+import logging
+
+
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,9 +35,24 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         # ...
         return token
     
+    
+#     # before
+# class MyTokenObtainPairView(TokenObtainPairView):
+#     serializer_class = MyTokenObtainPairSerializer
+
+logger = logging.getLogger(__name__)
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if 'access' in response.data:
+            access_token = response.data['access']
+            logger.info(f"Access Token: ⭐⭐⭐ {access_token} ⭐⭐⭐")
+        return response
+
+# vvvvvvvvvvvvvvvvvv
 
 # register
 @api_view(['POST'])
@@ -72,6 +91,7 @@ def index(req):
     return Response('hello')
 
 @api_view(['GET', 'POST', 'DELETE', 'PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
 def tasks(req, id=-1):
     if req.method == 'GET':
         if id > -1:
