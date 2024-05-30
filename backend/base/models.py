@@ -14,3 +14,9 @@ class Task(models.Model):
 
     def _str_(self):
         return self.title
+
+    @property
+    def image_url(self):
+        if self.image:
+            return self.image.url
+        return ''
