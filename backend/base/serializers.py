@@ -68,3 +68,71 @@ class BigTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ['id', 'title', 'description', 'completed', 'due_date', 'image', 'is_big_task', 'subtasks', 'user']
+        
+        
+# # serializers.py
+# from rest_framework import serializers
+# from django.contrib.auth.models import User
+# from .models import UserProfile
+
+# class UserProfileSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = UserProfile
+#         fields = ['bio', 'location', 'birth_date', 'profile_picture']
+
+# class UserSerializer(serializers.ModelSerializer):
+#     profile = UserProfileSerializer(required=False)
+#     password = serializers.CharField(write_only=True, required=True)
+
+#     class Meta:
+#         model = User
+#         fields = ['username', 'password', 'email', 'profile']
+#         extra_kwargs = {'password': {'write_only': True}}
+
+#     def create(self, validated_data):
+#         profile_data = validated_data.pop('profile', {})
+#         password = validated_data.pop('password')
+#         user = User.objects.create_user(**validated_data)
+#         user.set_password(password)
+#         user.save()
+#         UserProfile.objects.update_or_create(user=user, defaults=profile_data)
+#         return user
+
+# serializers.py
+from rest_framework import serializers
+from django.contrib.auth.models import User
+from .models import UserProfile
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['bio', 'location', 'birth_date', 'profile_picture']
+
+class UserSerializer(serializers.ModelSerializer):
+    profile = UserProfileSerializer(required=False)
+    password = serializers.CharField(write_only=True, required=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'email', 'profile']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        password = validated_data.pop('password')
+        user = User.objects.create_user(**validated_data)
+        user.set_password(password)
+        user.save()
+        UserProfile.objects.update_or_create(user=user, defaults=profile_data)
+        return user
+
+
+
+    def update(self, instance, validated_data):
+        instance.bio = validated_data.get('bio', instance.bio)
+        instance.location = validated_data.get('location', instance.location)
+        instance.birth_date = validated_data.get('birth_date', instance.birth_date)
+        if 'profile_picture' in validated_data:
+            instance.profile_picture = validated_data['profile_picture']
+        instance.save()
+        return instance

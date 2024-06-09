@@ -49,18 +49,18 @@ class MyTokenObtainPairView(TokenObtainPairView):
             logger.info(f"Access Token: ⭐⭐⭐ {access_token} ⭐⭐⭐")
         return response
 
-# register
-@api_view(['POST'])
-def register(request):
-    user = User.objects.create_user(
-                username=request.data['username'],
-                email=request.data['email'],
-                password=request.data['password']
-            )
-    user.is_active = True
-    user.is_staff = True
-    user.save()
-    return Response("new user born")
+# # register
+# @api_view(['POST'])
+# def register(request):
+#     user = User.objects.create_user(
+#                 username=request.data['username'],
+#                 email=request.data['email'],
+#                 password=request.data['password']
+#             )
+#     user.is_active = True
+#     user.is_staff = True
+#     user.save()
+#     return Response("new user born")
 
 # logout
 @api_view(['POST'])
@@ -119,3 +119,47 @@ def tasks(req, id=-1):
             return Response("Task deleted successfully")
         except Task.DoesNotExist:
             return Response("Task not found", status=404)
+        
+        
+# newwwwwwwwwwwwwwwwwwwww
+
+
+# views.py
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from .serializers import UserSerializer, UserProfileSerializer
+from .models import UserProfile
+
+class RegisterView(APIView):
+    def post(self, request):
+        user_serializer = UserSerializer(data=request.data)
+        if user_serializer.is_valid():
+            user = user_serializer.save()
+            profile_serializer = UserProfileSerializer(user.profile, data=request.data, partial=True)
+            if profile_serializer.is_valid():
+                profile_serializer.save()
+                return Response(user_serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                user.delete()  # Rollback user creation if profile creation fails
+                return Response(profile_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = UserProfile.objects.get(user=request.user)
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        profile = UserProfile.objects.get(user=request.user)
+        serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
