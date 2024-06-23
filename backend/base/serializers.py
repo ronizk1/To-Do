@@ -106,7 +106,7 @@ from .models import UserProfile
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['bio', 'location', 'birth_date', 'profile_picture']
+        fields = ['name', 'location', 'birth_date', 'profile_picture']
 
 class UserSerializer(serializers.ModelSerializer):
     profile = UserProfileSerializer(required=False)
@@ -129,7 +129,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
     def update(self, instance, validated_data):
-        instance.bio = validated_data.get('bio', instance.bio)
+        instance.name = validated_data.get('name', instance.name)
         instance.location = validated_data.get('location', instance.location)
         instance.birth_date = validated_data.get('birth_date', instance.birth_date)
         if 'profile_picture' in validated_data:
